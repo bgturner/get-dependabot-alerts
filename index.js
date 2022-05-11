@@ -2,6 +2,7 @@
 
 import dotenv from "dotenv";
 import { graphql } from "@octokit/graphql";
+import csvWriter from "csv-writer";
 
 dotenv.config();
 
@@ -13,13 +14,9 @@ const graphqlWithAuth = graphql.defaults({
   },
 });
 
-repos.forEach((item) => {
-  const [org, repo] = item.split("/");
-  DumpDependabotAlerts(org, repo);
-});
-
-async function DumpDependabotAlerts(org, repo) {
+async function getDependabotAlerts(org, repo) {
   let pagination = null;
+  let dependabotAlerts = [];
   const query = `query ($org: String! $repo: String! $cursor: String){
       repository(owner: $org name: $repo) {
         name
@@ -62,7 +59,6 @@ async function DumpDependabotAlerts(org, repo) {
     }`;
 
   try {
-    console.log("org,repo,package,ecosystem,summary,severity,permalink");
     let hasNextPage = false;
     do {
       const getVulnResult = await graphqlWithAuth({
@@ -76,9 +72,15 @@ async function DumpDependabotAlerts(org, repo) {
       const vulns = getVulnResult.repository.vulnerabilityAlerts.nodes;
 
       for (const vuln of vulns) {
-        console.log(
-          `${org},${repo},${vuln.securityVulnerability.package.name},${vuln.securityVulnerability.package.ecosystem},"${vuln.securityAdvisory.summary}",${vuln.securityAdvisory.severity},${vuln.securityAdvisory.permalink}`
-        );
+        dependabotAlerts.push({
+          org: org,
+          repo: repo,
+          package: vuln.securityVulnerability.package.name,
+          ecosystem: vuln.securityVulnerability.package.ecosystem,
+          summary: vuln.securityAdvisory.summary,
+          severity: vuln.securityAdvisory.severity,
+          permalink: vuln.securityAdvisory.permalink,
+        });
       }
 
       if (hasNextPage) {
@@ -86,8 +88,36 @@ async function DumpDependabotAlerts(org, repo) {
           getVulnResult.repository.vulnerabilityAlerts.pageInfo.endCursor;
       }
     } while (hasNextPage);
+    return dependabotAlerts;
   } catch (error) {
-    console.log("Request failed:", error.request);
-    console.log(error.message);
+    console.error("Request failed:", error.request);
+    console.error(error.message);
   }
 }
+
+const header = [
+  { id: "org", title: "Org" },
+  { id: "repo", title: "Repo" },
+  { id: "package", title: "Package" },
+  { id: "ecosystem", title: "Ecosystem" },
+  { id: "summary", title: "Summary" },
+  { id: "severity", title: "Severity" },
+  { id: "permalink", title: "Permalink" },
+];
+
+const createCsvStringifier = csvWriter.createObjectCsvStringifier;
+const csvStringifier = createCsvStringifier({ header });
+console.log(csvStringifier.getHeaderString());
+
+async function getVulns(repos) {
+  await Promise.all(
+    repos.map(async (item) => {
+      const [org, repo] = item.split("/");
+      getDependabotAlerts(org, repo).then((result) => {
+        console.log(csvStringifier.stringifyRecords(result));
+      });
+    })
+  );
+}
+
+getVulns(repos);
