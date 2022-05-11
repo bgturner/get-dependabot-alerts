@@ -37,6 +37,12 @@ async function getDependabotAlerts(org, repo) {
               }
               vulnerableVersionRange
             }
+            createdAt
+            state
+            fixedAt
+            fixReason
+            dismissedAt
+            dismissReason
             vulnerableManifestFilename
             vulnerableManifestPath
             vulnerableRequirements
@@ -80,6 +86,12 @@ async function getDependabotAlerts(org, repo) {
           summary: vuln.securityAdvisory.summary,
           severity: vuln.securityAdvisory.severity,
           permalink: vuln.securityAdvisory.permalink,
+          createdAt: vuln.createdAt,
+          state: vuln.state,
+          fixedAt: vuln.fixedAt,
+          fixReason: vuln.fixReason,
+          dismissedAt: vuln.dismissedAt,
+          dismissReason: vuln.dismissReason,
         });
       }
 
@@ -102,6 +114,12 @@ const header = [
   { id: "ecosystem", title: "Ecosystem" },
   { id: "summary", title: "Summary" },
   { id: "severity", title: "Severity" },
+  { id: "createdAt", title: "Created At" },
+  { id: "state", title: "State" },
+  { id: "fixedAt", title: "Fixedat" },
+  { id: "fixReason", title: "Fixreason" },
+  { id: "dismissedAt", title: "Dismissed At" },
+  { id: "dismissReason", title: "Dismiss Reason" },
   { id: "permalink", title: "Permalink" },
 ];
 
