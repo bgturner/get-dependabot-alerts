@@ -43,7 +43,6 @@ async function getDependabotAlerts(org, repo) {
             fixReason
             dismissedAt
             dismissReason
-            vulnerableManifestFilename
             vulnerableManifestPath
             vulnerableRequirements
           }
@@ -85,7 +84,10 @@ async function getDependabotAlerts(org, repo) {
           ecosystem: vuln.securityVulnerability.package.ecosystem,
           summary: vuln.securityAdvisory.summary,
           severity: vuln.securityAdvisory.severity,
-          permalink: vuln.securityAdvisory.permalink,
+          advisoryPermalink: vuln.securityAdvisory.permalink,
+          urlRepoAlerts: `https://github.com/${org}/${repo}/security/dependabot/?q=is:open%20package:${vuln.securityVulnerability.package.name}%20${vuln.securityAdvisory.ghsaId}`,
+          vulnerableManifestPath: vuln.vulnerableManifestPath,
+          vulnerableRequirements: vuln.vulnerableRequirements,
           createdAt: vuln.createdAt,
           state: vuln.state,
           fixedAt: vuln.fixedAt,
@@ -110,17 +112,20 @@ async function getDependabotAlerts(org, repo) {
 const header = [
   { id: "org", title: "Org" },
   { id: "repo", title: "Repo" },
+  { id: "vulnerableManifestPath", title: "Vulnerable Manifest File" },
+  { id: "vulnerableRequirements", title: "Minimum Fixed Version" },
   { id: "package", title: "Package" },
   { id: "ecosystem", title: "Ecosystem" },
   { id: "summary", title: "Summary" },
   { id: "severity", title: "Severity" },
   { id: "createdAt", title: "Created At" },
   { id: "state", title: "State" },
+  { id: "urlRepoAlerts", title: "Url for Dependabot Alerts" },
   { id: "fixedAt", title: "Fixedat" },
   { id: "fixReason", title: "Fixreason" },
   { id: "dismissedAt", title: "Dismissed At" },
   { id: "dismissReason", title: "Dismiss Reason" },
-  { id: "permalink", title: "Permalink" },
+  { id: "advisoryPermalink", title: "Advisory Permalink" },
 ];
 
 const createCsvStringifier = csvWriter.createObjectCsvStringifier;
