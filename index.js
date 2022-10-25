@@ -16,6 +16,18 @@ if (repos.length < 1) {
   process.exit(1);
 }
 
+if (!process.env.GITHUB_TOKEN) {
+  console.error("Github auth token not set.");
+  console.error(
+    "Generate a token at: https://help.github.com/articles/authorizing-a-personal-access-token-for-use-with-a-saml-single-sign-on-organization/"
+  );
+  console.error(
+    "Then update the .env file of this repo, or export within the terminal:"
+  );
+  console.error("    export GITHUB_TOKEN='xxxxxxxxxx'");
+  process.exit(1);
+}
+
 const graphqlWithAuth = graphql.defaults({
   headers: {
     authorization: `token ${process.env.GITHUB_TOKEN}`,
