@@ -8,6 +8,14 @@ dotenv.config();
 
 const repos = process.argv.slice(2);
 
+if (repos.length < 1) {
+  console.error("At least one repo needs to be provided.");
+  console.error(
+    "    Usage: get-dependabot-alerts <@organization/repo> [...@organization/repo]"
+  );
+  process.exit(1);
+}
+
 const graphqlWithAuth = graphql.defaults({
   headers: {
     authorization: `token ${process.env.GITHUB_TOKEN}`,
