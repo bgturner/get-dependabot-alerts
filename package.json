@@ -13,5 +13,6 @@
     "@octokit/graphql": "^4.8.0",
     "csv-writer": "^1.6.0",
     "dotenv": "^16.0.1"
-  }
+  },
+  "bin": "./index.js"
 }
