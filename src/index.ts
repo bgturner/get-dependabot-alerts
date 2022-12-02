@@ -2,7 +2,7 @@
 
 import dotenv from "dotenv";
 import { graphql } from "@octokit/graphql";
-import csvWriter from "csv-writer";
+import * as csvWriter from "csv-writer";
 
 dotenv.config();
 

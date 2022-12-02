@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Gets Dependabot Alerts from a collection of repositories",
   "main": "index.js",
-  "type": "module",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "bgturner",
@@ -14,5 +14,9 @@
     "csv-writer": "^1.6.0",
     "dotenv": "^16.0.1"
   },
-  "bin": "./index.js"
+  "bin": "./lib/index.js",
+  "devDependencies": {
+    "@types/node": "^18.11.10",
+    "typescript": "^4.9.3"
+  }
 }
