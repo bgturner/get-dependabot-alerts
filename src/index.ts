@@ -2,6 +2,7 @@
 
 import dotenv from "dotenv";
 import { graphql } from "@octokit/graphql";
+import { GraphQlQueryResponseData } from "@octokit/graphql/dist-types/types";
 import * as csvWriter from "csv-writer";
 
 dotenv.config();
@@ -34,7 +35,7 @@ const graphqlWithAuth = graphql.defaults({
   },
 });
 
-async function getDependabotAlerts(org, repo) {
+async function getDependabotAlerts(org: string, repo: string) {
   let pagination = null;
   let dependabotAlerts = [];
   const query = `query ($org: String! $repo: String! $cursor: String){
@@ -86,7 +87,7 @@ async function getDependabotAlerts(org, repo) {
   try {
     let hasNextPage = false;
     do {
-      const getVulnResult = await graphqlWithAuth({
+      const getVulnResult: GraphQlQueryResponseData = await graphqlWithAuth({
         query,
         org: org,
         repo: repo,
@@ -124,8 +125,9 @@ async function getDependabotAlerts(org, repo) {
     } while (hasNextPage);
     return dependabotAlerts;
   } catch (error) {
-    console.error("Request failed:", error.request);
-    console.error(error.message);
+    if (error instanceof Error) {
+      console.error("Request failed:", error.message);
+    }
   }
 }
 
@@ -152,12 +154,14 @@ const createCsvStringifier = csvWriter.createObjectCsvStringifier;
 const csvStringifier = createCsvStringifier({ header });
 console.log(csvStringifier.getHeaderString());
 
-async function getVulns(repos) {
+async function getVulns(repos: string[]) {
   await Promise.all(
-    repos.map(async (item) => {
+    repos.map(async (item: string) => {
       const [org, repo] = item.split("/");
       getDependabotAlerts(org, repo).then((result) => {
-        console.log(csvStringifier.stringifyRecords(result));
+        if (result) {
+          console.log(csvStringifier.stringifyRecords(result));
+        }
       });
     })
   );
