@@ -4,17 +4,19 @@ import dotenv from "dotenv";
 import { graphql } from "@octokit/graphql";
 import { GraphQlQueryResponseData } from "@octokit/graphql/dist-types/types";
 import * as csvWriter from "csv-writer";
+import validateRepos from "./validateRepos";
 
 dotenv.config();
 
-const repos = process.argv.slice(2);
+let repos = process.argv.slice(2);
 
-if (repos.length < 1) {
-  console.error("At least one repo needs to be provided.");
-  console.error(
-    "    Usage: get-dependabot-alerts <@organization/repo> [...@organization/repo]"
-  );
-  process.exit(1);
+try {
+  repos = validateRepos(repos);
+} catch (err) {
+  if (err instanceof Error) {
+    console.error(err.message);
+    process.exit(1);
+  }
 }
 
 if (!process.env.GITHUB_TOKEN) {
