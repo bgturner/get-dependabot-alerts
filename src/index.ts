@@ -5,6 +5,7 @@ import { graphql } from "@octokit/graphql";
 import { GraphQlQueryResponseData } from "@octokit/graphql/dist-types/types";
 import * as csvWriter from "csv-writer";
 import validateRepos from "./validateRepos";
+import getGithubToken from "./getGithubToken";
 
 dotenv.config();
 
@@ -19,21 +20,20 @@ try {
   }
 }
 
-if (!process.env.GITHUB_TOKEN) {
-  console.error("Github auth token not set.");
-  console.error(
-    "Generate a token at: https://help.github.com/articles/authorizing-a-personal-access-token-for-use-with-a-saml-single-sign-on-organization/"
-  );
-  console.error(
-    "Then update the .env file of this repo, or export within the terminal:"
-  );
-  console.error("    export GITHUB_TOKEN='xxxxxxxxxx'");
-  process.exit(1);
+let token;
+
+try {
+  token = getGithubToken();
+} catch (err) {
+  if (err instanceof Error) {
+    console.error(err.message);
+    process.exit(1);
+  }
 }
 
 const graphqlWithAuth = graphql.defaults({
   headers: {
-    authorization: `token ${process.env.GITHUB_TOKEN}`,
+    authorization: `token ${token}`,
   },
 });
 
